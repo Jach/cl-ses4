@@ -1,0 +1,6 @@
+*.fasl
+Session.vim
+*.swp
+coverage/
+ses-send-email
+aws-credentials
