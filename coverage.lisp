@@ -26,4 +26,5 @@ Run tests + generate coverage report, use sbcl --script coverage.lisp
   (asdf:test-system :cl-ses4))
 
 #+sbcl
-(sb-cover:report "coverage/")
+(handler-bind ((warning #'muffle-warning))
+  (sb-cover:report "coverage/"))
