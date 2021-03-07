@@ -15,9 +15,9 @@ Run tests + generate coverage report, use sbcl --script coverage.lisp
 (ql:quickload :cl-ses4/test :silent t)
 
 #+sbcl
-(progn
-  (require :sb-cover)
-  (declaim (optimize sb-cover:store-coverage-data)))
+(require :sb-cover)
+#+sbcl
+(declaim (optimize sb-cover:store-coverage-data))
 
 (let ((*compile-verbose* nil)
       (*load-verbose* nil))
