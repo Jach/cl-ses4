@@ -19,6 +19,11 @@
 (defparameter *region* "us-east-1")
 (defparameter *service* "ses")
 
+;; Use UTC-0 when displaying time zone info. Avoids issues where a
+;; built executable implicitly usse the time zone of the build machine which
+;; can differ from the time zone of the machine running the executable.
+(setf local-time:*default-timezone* local-time:+utc-zone+)
+
 (defun handle-endpoint (endpoint)
   (when endpoint
     (setf *ses-host* (quri:uri-host (quri:uri endpoint)))
@@ -69,7 +74,7 @@ Subject: Thing
                 ("RawMessage.Data" . ,(cl-base64:string-to-base64-string raw)))))
 
 (defun send-email (email-params)
-  (let* ((date-time (simple-date-time:now))
+  (let* ((date-time (local-time:now))
          (email-enc (quri:url-encode-params email-params))
          (headers (create-initial-ses-headers date-time *ses-host* (length email-enc)))
          (canonical-request (create-canonical-request "POST"

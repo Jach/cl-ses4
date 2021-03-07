@@ -15,16 +15,21 @@
     ))
 (in-package #:ses4/sig)
 
-(defun amazon-iso-8601-basic-time (date-time)
-  "Returns date-time in the format  YYYYMMDDTHHMMSSZ, which is required by Amazon.
-   simple-date-time:|yyyymmddThhmmssZ| does not handle time zones, and without any
-   info after the 'Z' the date is assumed to be at UTC+0. This naively corrects the hour
-   based on whatever simple-date-time:*default-timezone* is, however this is likely to break
-   for unusual timezones that aren't offset by whole hours."
-  (format nil "~04,'0d~02,'0d~02,'0dT~02,'0d~02,'0d~02,'0dZ"
-          (simple-date-time:year-of date-time) (simple-date-time:month-of date-time) (simple-date-time:day-of date-time)
-          (+ (simple-date-time:hour-of date-time) (- simple-date-time:*default-timezone*)) (simple-date-time:minute-of date-time) (simple-date-time:second-of date-time)))
+(defparameter +amazon-iso-8601-basic-time-format+
+  '((:year 4) (:month 2) (:day 2) #\T (:hour 2) (:min 2) (:sec 2) :gmt-offset-or-z))
 
+(defparameter +credential-scope-date-format+
+  '((:year 4) (:month 2) (:day 2)))
+
+(defun amazon-iso-8601-basic-time (date-time)
+  "Returns date-time in the format YYYYMMDDTHHMMSSZ, which is required by Amazon."
+  (local-time:format-timestring nil date-time :format +amazon-iso-8601-basic-time-format+))
+
+(defun yyyymmdd (date-time)
+  (local-time:format-timestring nil date-time :format +credential-scope-date-format+))
+
+(defparameter +iso-8601-time-format+
+  '((:hour 2) #\: (:min 2) #\: (:sec 2) #\. (:usec 6)))
 (defun hash-payload (payload)
   "Creates HashedPayload = Lowercase(HexEncode(Hash(payload)))
    using SHA256"
@@ -37,7 +42,7 @@
   (format nil "~{~2,'0x~}" (coerce byte-vec 'list)))
 
 (defun create-string-to-sign (date-time region service canonical-request)
-  "Given a simple-date-time:date-time, a region, a service, and a cononical request (created by #'create-canonical-request)
+  "Given a local-time:timestamp, a region, a service, and a cononical request (created by #'create-canonical-request)
    returns a string to sign according to https://docs.aws.amazon.com/general/latest/gr/sigv4-create-string-to-sign.html
    with AWS4-HMAC-SHA256 as the default algorithm."
   (let ((\n '(#\Newline)))
@@ -48,7 +53,7 @@
                  (hash-payload canonical-request))))
 
 (defun credential-scope (date-time region service)
-  (uiop:strcat (simple-date-time:yyyymmdd date-time) "/" region "/" service "/aws4_request"))
+  (uiop:strcat (yyyymmdd date-time) "/" region "/" service "/aws4_request"))
 
 (defun hmac-sha256 (key data &aux mac)
   (when (typep key 'string)
@@ -61,10 +66,10 @@
   (ironclad:produce-mac mac))
 
 (defun derive-signing-key (secret-key date region service)
-  "Given an AWS Secret Access Key, a simple-date-time:date, region, and service,
+  "Given an AWS Secret Access Key, a local-time:timestamp, region, and service,
    computes the signing key as per https://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html"
   (-> (uiop:strcat "AWS4" secret-key)
-    (hmac-sha256 (simple-date-time:yyyymmdd date))
+    (hmac-sha256 (yyyymmdd date))
     (hmac-sha256 region)
     (hmac-sha256 service)
     (hmac-sha256 "aws4_request")))

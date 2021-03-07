@@ -7,10 +7,6 @@
 (def-suite ses-test)
 (in-suite ses-test)
 
-(def-fixture date-env ()
-  (let ((simple-date-time:*default-timezone* 0))
-    (&body)))
-
 (def-test canonical-uri ()
   (is (equal "/"
              (canonicalize-uri "/")))
@@ -94,7 +90,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
                                          ""))))
   )
 
-(def-test string-to-sign (:fixture date-env)
+(def-test string-to-sign ()
   (let* ((headers '(("Host" . "iam.amazonaws.com") ("Content-Type" . "application/x-www-form-urlencoded; charset=utf-8") ("X-Amz-Date" . "20150830T123600Z")))
          (canonical-request (create-canonical-request "GET"
                                                       "/"
@@ -105,24 +101,24 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 20150830T123600Z
 20150830/us-east-1/iam/aws4_request
 f536975d06c0309214f805bb90ccff089219ecd68b2577efef23edd43b7e1a59"
-               (create-string-to-sign (simple-date-time:make-date-time 2015 8 30 12 36 0) "us-east-1" "iam" canonical-request))))
+               (create-string-to-sign (local-time:encode-timestamp 0 0 36 12 30 8 2015) "us-east-1" "iam" canonical-request))))
   )
 
 (def-test derived-signing-key ()
   (is (equal "c4afb1cc5771d871763a393e44b703571b55cc28424d1a5e86da6ed3c154a4b9"
              (string-downcase (hex-digest (derive-signing-key "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
-                                                              (simple-date-time:make-date 2015 8 30)
+                                                              (local-time:encode-timestamp 0 0 0 0 30 8 2015)
                                                               "us-east-1"
                                                               "iam"))))))
 
-(def-test signature (:fixture date-env)
+(def-test signature ()
   (let* ((headers '(("Host" . "iam.amazonaws.com") ("Content-Type" . "application/x-www-form-urlencoded; charset=utf-8") ("X-Amz-Date" . "20150830T123600Z")))
          (canonical-request (create-canonical-request "GET"
                                                       "/"
                                                       "Action=ListUsers&Version=2010-05-08"
                                                       headers
                                                       ""))
-         (date (simple-date-time:make-date-time 2015 8 30 12 36 0))
+         (date (local-time:encode-timestamp 0 0 36 12 30 8 2015))
          (string-to-sign (create-string-to-sign date "us-east-1" "iam" canonical-request))
          (derived-key (derive-signing-key "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
                                  date
@@ -131,14 +127,14 @@ f536975d06c0309214f805bb90ccff089219ecd68b2577efef23edd43b7e1a59"
     (is (equal "5d672d79c15b13162d9279b0855cfba6789a8edb4c82c400e06b5924a6f2b5d7"
                (sign derived-key string-to-sign)))))
 
-(def-test auth-header (:fixture date-env)
+(def-test auth-header ()
   (let* ((headers '(("Host" . "iam.amazonaws.com") ("Content-Type" . "application/x-www-form-urlencoded; charset=utf-8") ("X-Amz-Date" . "20150830T123600Z")))
          (canonical-request (create-canonical-request "GET"
                                                       "/"
                                                       "Action=ListUsers&Version=2010-05-08"
                                                       headers
                                                       ""))
-         (date (simple-date-time:make-date-time 2015 8 30 12 36 0))
+         (date (local-time:encode-timestamp 0 0 36 12 30 8 2015))
          (string-to-sign (create-string-to-sign date "us-east-1" "iam" canonical-request))
          (derived-key (derive-signing-key "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
                                  date
@@ -148,12 +144,12 @@ f536975d06c0309214f805bb90ccff089219ecd68b2577efef23edd43b7e1a59"
     (is (equal "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=5d672d79c15b13162d9279b0855cfba6789a8edb4c82c400e06b5924a6f2b5d7"
                (create-authorization-header "AKIDEXAMPLE" date "us-east-1" "iam" headers signature)))))
 
-(def-test initial-headers (:fixture date-env)
+(def-test initial-headers ()
   (is (equal '(("Date" . "20150830T123600Z")
                ("Host" . "email.us-west-2.amazonaws.com")
                ("Content-Length" . "12")
                ("Content-Type" . "application/x-www-form-urlencoded"))
-             (create-initial-ses-headers (simple-date-time:make-date-time 2015 8 30 12 36 0) "email.us-west-2.amazonaws.com" 12))))
+             (create-initial-ses-headers (local-time:encode-timestamp 0 0 36 12 30 8 2015) "email.us-west-2.amazonaws.com" 12))))
 
 (def-test hmac-sha-sanity ()
   (is (equal "CA52E7B754AA86C8911CC88BC90CF87FD6FFDC363232E11977997DFA946D8CCA"
