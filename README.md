@@ -62,14 +62,10 @@ pass in CCL.)
 If you have a specific feature request not yet supported, or run into a bug,
 feel free to file an Issue or submit a Pull Request.
 
-# License
+# Copyright License
 
-This library is free software. The author disclaims copyright to this project's
-source code. All files in this project, unless explicitly stated otherwise, are
-in the public domain and distributed without any warranty. If you live in a
-country that does not recognize grants to the public domain, you may consider
-this licensed under the
-[CC0](https://creativecommons.org/share-your-work/public-domain/cc0/).
+This library is free software released into the public domain. See UNLICENSE for
+more details.
 
 # Motivation
 
