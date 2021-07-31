@@ -1,6 +1,6 @@
 (asdf:defsystem #:cl-ses4
   :description "AWS SES email sender using Signature Version 4 of Amazon's API"
-  :version "1.1"
+  :version "1.2"
   :author "Kevin Secretan <github@thejach.com>"
   :license "Public Domain"
 
