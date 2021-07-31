@@ -55,6 +55,8 @@
    Expects the query string either as a string in the form 'Param1=Val1&Param2=Val2', with any equal signs in either names or values
    already encoded to %3D, or an alist of query params in the form ((Param1 . Val1) (Param2 . Val2)) with not-yet-encoded equal signs.
    Returns the query string as a string in the form 'Param1=Val1&Param2=Val2'"
+  (if (equal qs "")
+      (return-from canonicalize-query-string ""))
   (let ((sorted (sort-query-params (if (stringp qs)
                                        (quri:uri-query-params (quri:uri (uiop:strcat "?" qs)))
                                        qs))))
