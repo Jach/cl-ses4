@@ -1,4 +1,5 @@
 # CL-SES4
+[![Build Status](https://jenkins.thejach.com/buildStatus/icon?job=cl-ses4&style=plastic)](https://jenkins.thejach.com/job/cl-ses4/)
 
 This is a library for using Amazon Web Services (AWS) [Simple Email
 Service](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/using-ses-api-authentication.html)
