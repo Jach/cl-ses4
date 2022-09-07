@@ -93,7 +93,7 @@ Subject: Thing
 
     (dex:post (uiop:strcat "https://" *ses-host*)
               :headers headers
-              :content email-enc)))
+              :content email-params)))
 
 (defun main ()
   (handler-bind
